@@ -14,22 +14,22 @@ This is based on the work of Ranidspace's bfres work [https://github.com/ranidsp
 -in the add-on preferences, select your RomFS folder ripped from Splatoon 3. hopefully you don't need to touch the other settings.  
 	
 **IMPORT**  
--import a pack.zs (found at romfs/pack/scene)  
-	>-there are individual toggles to import or not import geometry/graffiti/other(non-geometry)/background/etc when selecting a pack.zs file  
-		>>-an import report (whose length/whether it includes all actions can be selected when selecting a file to import) can be found after each import in blender's tmp files  
-			>>>-found on mac at (drive)/private/var/folders/lt.......  
+- import a pack.zs (found at romfs/pack/scene)  
+	- there are individual toggles to import or not import geometry/graffiti/other(non-geometry)/background/etc when selecting a pack.zs file  
+		- an import report (whose length/whether it includes all actions can be selected when selecting a file to import) can be found after each import in blender's tmp files  
+			- found on mac at (drive)/private/var/folders/lt.......  
 	
 
 
--Graffiti (or other stuff too) could break sizing/folding/etc if the BFRES LOD Index is set to a value higher than 0, I haven't tested  
--There might be other bugs. Geometry and Graffiti should be pretty good by default, but I haven't conclusively tested much of anything in the non-geometry folder - I know the sun object is at the wrong angle.  
--every time I look away for a week and come back, something new is broken. I'll be real, this is spaghetti code from chatgpt. but it's usually easily fixable given the logs currently set up, and finally appears stable... for me.  
+- Graffiti (or other stuff too) could break sizing/folding/etc if the BFRES LOD Index is set to a value higher than 0, I haven't tested  
+- There might be other bugs. Geometry and Graffiti should be pretty good by default, but I haven't conclusively tested much of anything in the non-geometry folder - I know the sun object is at the wrong angle.  
+- every time I look away for a week and come back, something new is broken. I'll be real, this is spaghetti code from chatgpt. but it's usually easily fixable given the logs currently set up, and finally appears stable... for me.  
 
--active team (for color) and sponge inflation levels are accessible via custom properties -> spl_team_color, spl_sponge_inflate  
-	>-should be a shared custom property on all objects affected by each team color (pillows, sponges, ink rails, rm-no-go signs, etc)  
-	>-team colors: neutral/alpha/bravo/charlie (charlie only for tricolor)  
-	>-Sponge inflation may be correct at 1 for cubic sponges but 0.6 for rectangular sponges? (on Yagara) (might vary, idk anymore)  
-		>>-okay sponge inflation is just not set up correctly, some stages the current max size is too small  
+- active team (for color) and sponge inflation levels are accessible via custom properties -> spl_team_color, spl_sponge_inflate  
+	- should be a shared custom property on all objects affected by each team color (pillows, sponges, ink rails, rm-no-go signs, etc)  
+	- team colors: neutral/alpha/bravo/charlie (charlie only for tricolor)  
+	- Sponge inflation may be correct at 1 for cubic sponges but 0.6 for rectangular sponges? (on Yagara) (might vary, idk anymore)  
+		- okay sponge inflation is just not set up correctly, some stages the current max size is too small  
 
 
 
