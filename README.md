@@ -3,7 +3,7 @@ Splatoon 3 stage importer for blender
 currently only built for mac, only proven working on macos 26/27 and blender 4.2.14
 
 **WARNING:** add-on made with chatgpt  
-These my human notes, below. A summary of what the bot thinks its done is in the zip's readme  
+These my human notes, below. A summary of what the bot thinks its done is in the README_AI  
 My notes are awful b/c I did not write down everything I discovered, and only kept track of things that still didn't work. Sorry  
 I've tried to add notes based on what I remember  
 
