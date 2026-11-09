@@ -101,7 +101,7 @@ OVERALL STRUCTURE (from my memory):
 		- bcett.byml also contains data for objects that do not have models - sound objects, light objects, rails, areas where super chumps can't land, enemy spawners, etc etc  
 			- if it does something in 3d, its probably in the bcett.byml  
 			- I have these more or less sorted into folders in blender once you import  
-	>-the environmental lighting is separate, as files in pack.zs/Gyml/(stage)day or (stage)night or etc  
+	- the environmental lighting is separate, as files in pack.zs/Gyml/(stage)day or (stage)night or etc  
 		- also specifies skybox file  
 	- the Graffiti is also separate, in per-mode files in pack.zs/graffiti  
 		
