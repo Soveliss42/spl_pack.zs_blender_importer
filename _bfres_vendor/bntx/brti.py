@@ -1,0 +1,143 @@
+import io
+import logging
+import math
+import traceback
+from enum import IntEnum
+
+from ..bfrespy import core
+from .pixelfmt.base import TextureFormat
+from .pixelfmt.formatinfo import blk_dims, bpps
+from .pixelfmt.swizzle import deswizzle
+
+log = logging.getLogger(__name__)
+
+
+def pow2_round_up(x):
+    return 1 if x == 0 else 2 ** (x - 1).bit_length()
+
+
+class BRTI(core.ResData):
+    """A BRTI in a BNTX."""
+
+    __signature = "BRTI"
+
+    def __init__(self):
+        self.name: str
+        self.mip_offsets = []
+        self.mip_data: bytes
+
+    def load(self, loader: core.ResFileLoader):
+        loader.check_signature(self.__signature)
+        length = loader.read_uint32()
+        length1 = loader.read_uint64()
+        self.flags = loader.read_byte()  # Texture Info
+        self.dimensions = loader.read_byte()
+        self.tile_mode = loader.read_uint16()
+        self.swizzle_size = loader.read_uint16()
+        mipmap_cnt = loader.read_uint16()
+        self.multisample_cnt = loader.read_uint16()
+        reserved = loader.read_uint16()
+        self.fmt_dtype = BRTI.TextureDataType(loader.read_byte())
+        self.fmt_id = loader.read_byte()
+        loader.seek(2)
+        access_flags = loader.read_uint32()
+        self.width = loader.read_int32()
+        self.height = loader.read_int32()
+        self.depth = loader.read_int32()
+        array_cnt = loader.read_uint32()
+        texture_layout = loader.read_uint32()
+        texture_layout2 = loader.read_uint32()
+        loader.seek(20)
+        data_len = loader.read_uint32()
+        self.alignment = loader.read_uint32()
+        self.channel_types = loader.read_bytes(4)
+        tex_type = loader.read_int32()
+        self.name = loader.load_string()
+        parent_offset = loader.read_offset()
+        ptrs_offset = loader.read_offset()
+
+        self.format_ = TextureFormat.get(self.fmt_id)
+        self.bpp = bpps[self.fmt_id]
+
+        if self.fmt_id in blk_dims:
+            self.blk_width, self.blk_height = blk_dims[self.fmt_id]
+        else:
+            self.blk_width, self.blk_height = 1, 1
+        self.blk_height_log2 = texture_layout & 7
+
+        with loader.temporary_seek(ptrs_offset):
+            for _ in range(mipmap_cnt):
+                entry = loader.read_uint32()  # - base
+                loader.seek(4)
+                self.mip_offsets.append(entry)
+
+        self.__read_data(loader, ptrs_offset, data_len)
+        self._osi_texture_decode_error = None
+        try:
+            self.pixels = self.format_.decompress(self)
+        except Exception as exc:
+            # Keep BFRES/BNTX loading private and resilient: one unsupported or
+            # mismatched texture decoder must not abort the whole model import.
+            # texture_importer.py detects this flag and creates a gray fallback
+            # image instead of calling the format-specific decoder again.
+            self._osi_texture_decode_error = f"{type(exc).__name__}: {exc}"
+            log.warning(
+                "Texture '%s' (%s) decode failed; using gray fallback pixels: %s",
+                getattr(self, "name", "<unnamed>"),
+                getattr(getattr(self, "format_", None), "__name__", "<unknown>"),
+                exc,
+                exc_info=True,
+            )
+            self.pixels = bytes((128, 128, 128, 255)) * max(1, int(self.width) * int(self.height))
+
+    class ChannelType(IntEnum):
+        ZERO = 0
+        ONE = 1
+        RED = 2
+        GREEN = 3
+        BLUE = 4
+        ALPHA = 5
+
+    class TextureType(IntEnum):
+        IMAGE1D = 0
+        IMAGE2D = 1
+        IMAGE3D = 2
+        CUBE = 3
+        CUBEFAR = 8
+
+    class TextureDataType(IntEnum):
+        UNORM = 1
+        SNORM = 2
+        UINT = 3
+        SINT = 4
+        SINGLE = 5
+        SRGB = 6
+        UHALF = 10
+
+    def __read_data(self, loader: core.ResFileLoader, ptrs_offset, data_len):
+        """Read the raw image data."""
+        loader.seek(ptrs_offset, io.SEEK_SET)
+        loader.seek(loader.read_uint64(), io.SEEK_SET)
+        self.data = loader.read_bytes(data_len)
+
+        lines_per_blk_height = (1 << self.blk_height_log2) * 8
+        blk_height_shift = 0
+        mip_offset = self.mip_offsets[0]
+
+        size = math.ceil(self.width / self.blk_width) * math.ceil(self.height / self.blk_height) * self.bpp
+
+        if pow2_round_up(math.ceil(self.height / self.blk_height)) < lines_per_blk_height:
+            blk_height_shift += 1
+
+        result = deswizzle(
+            self.width,
+            self.height,
+            self.blk_width,
+            self.blk_height,
+            self.bpp,
+            self.tile_mode,
+            max(0, self.blk_height_log2 - blk_height_shift),
+            self.data,
+        )
+
+        self.mip_data = result[:size]
