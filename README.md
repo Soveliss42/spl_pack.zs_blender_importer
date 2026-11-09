@@ -15,8 +15,8 @@ This is based on the work of Ranidspace's bfres work [https://github.com/ranidsp
 	
 **IMPORT**  
 -import a pack.zs (found at romfs/pack/scene)  
-	-there are individual toggles to import or not import geometry/graffiti/other(non-geometry)/background/etc when selecting a pack.zs file  
-	-an import report (whose length/whether it includes all actions can be selected when selecting a file to import) can be found after each import in blender's tmp files  
+>-there are individual toggles to import or not import geometry/graffiti/other(non-geometry)/background/etc when selecting a pack.zs file  
+>>-an import report (whose length/whether it includes all actions can be selected when selecting a file to import) can be found after each import in blender's tmp files  
 	-found on mac at (drive)/private/var/folders/lt.......  
 	
 
