@@ -1,5 +1,6 @@
 # spl_pack.zs_blender_importer
 Splatoon 3 stage importer for blender
+currently only built for mac, only proven working on macos 26/27 and blender 4.2.14
 
 **WARNING:** add-on made with chatgpt  
 These my human notes, below. A summary of what the bot thinks its done is in the zip's readme  
